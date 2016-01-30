@@ -1,22 +1,25 @@
 package de.f7o.kd_tree.example;
 
+
+
 import de.f7o.kd_tree.KDTree;
 import de.f7o.kd_tree.util.AxisComparator;
+import de.f7o.kd_tree.util.AxisValueResolver;
 import de.f7o.kd_tree.util.Metric;
-import de.tu_darmstadt.gris.edge_bundling.util.AxisValueResolver;
-import de.tu_darmstadt.gris.edge_bundling.util.Vector4d;
+
+
 
 
 /**
  * Created by flo on 29.01.2016.
  * Min. Java 1.8
  *
- * this is just an example test with an 4D KD Tree (possibly every dimension)
+ * this is just an Example test with an 4D KD Tree (possibly every dimension)
  * i implemented this cause i needed an fully generic kd-tree
  *
  * instead of vector4d u could use anything u like, if u get it to implement the metric and compare function
  */
-public class example {
+public class Example {
     public static void main(String[] args) {
         Metric<Vector4d> euclidDist4d = (v1, v2) -> {
             Double diff0 = v1.x - v2.x;
@@ -51,14 +54,16 @@ public class example {
 
         KDTree<Vector4d> edgeTree = new KDTree<>(euclidDist4d, comp4d, getAxisVal, 4);
 
+        Vector4d tmp = new Vector4d(1.0, 2.0, 3.0, 4.0);
+
         /**
          * here you could add your nodes..
          */
-        edgeTree.addNode(new Vector4d(1.0, 2.0, 3.0, 4.0));
+        edgeTree.addNode(tmp);
 
         /**
          * returns collection of k nearest
          */
-        this.edgeTree.findKNearestNeighbors(this.treeNodes[0], 3);
+        edgeTree.findKNearestNeighbors(tmp, 3);
     }
 }

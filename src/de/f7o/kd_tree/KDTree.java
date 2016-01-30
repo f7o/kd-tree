@@ -1,4 +1,8 @@
-package de.tu_darmstadt.gris.edge_bundling.util;
+package de.f7o.kd_tree;
+
+import de.f7o.kd_tree.util.AxisComparator;
+import de.f7o.kd_tree.util.AxisValueResolver;
+import de.f7o.kd_tree.util.Metric;
 
 import java.util.*;
 
