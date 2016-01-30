@@ -3,6 +3,8 @@ package de.f7o.kd_tree.example;
 import de.f7o.kd_tree.KDTree;
 import de.f7o.kd_tree.util.AxisComparator;
 import de.f7o.kd_tree.util.Metric;
+import de.tu_darmstadt.gris.edge_bundling.util.AxisValueResolver;
+import de.tu_darmstadt.gris.edge_bundling.util.Vector4d;
 
 
 /**
@@ -37,15 +39,26 @@ public class example {
                     return 0;
             }
         };
+        AxisValueResolver<Vector4d> getAxisVal = (v, axis) -> {
+            switch(axis) {
+                case 0: return v.x;
+                case 1: return v.y;
+                case 2: return v.z;
+                case 3: return v.w;
+                default: return 0.0;
+            }
+        };
 
-
-        KDTree<Vector4d> edgeTree = new KDTree<>(euclidDist4d, comp4d, 4);
+        KDTree<Vector4d> edgeTree = new KDTree<>(euclidDist4d, comp4d, getAxisVal, 4);
 
         /**
          * here you could add your nodes..
          */
         edgeTree.addNode(new Vector4d(1.0, 2.0, 3.0, 4.0));
 
-
+        /**
+         * returns collection of k nearest
+         */
+        this.edgeTree.findKNearestNeighbors(this.treeNodes[0], 3);
     }
 }
