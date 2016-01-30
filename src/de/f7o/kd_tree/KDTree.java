@@ -1,7 +1,4 @@
-package de.f7o.kd_tree;
-
-import de.f7o.kd_tree.util.AxisComparator;
-import de.f7o.kd_tree.util.Metric;
+package de.tu_darmstadt.gris.edge_bundling.util;
 
 import java.util.*;
 
@@ -12,8 +9,9 @@ public class KDTree<V> {
     private KDTreeNode<V> root;
     private Metric<V> metric;
     private AxisComparator<V> axisComparator;
-    //tested max. k=4
+    //max. k=4
     private Integer k;
+
 
     public KDTree(Metric<V> metric, AxisComparator<V> axisComparator, Integer k) {
         this.metric = metric;
@@ -73,8 +71,9 @@ public class KDTree<V> {
 
         // Map used for results
         TreeSet<KDTreeNode<V>> results = new TreeSet<>((o1, o2) -> {
-            Comparable dist = metric.distance(o1.getKey(), o2.getKey());
-            return dist.compareTo(0.0);
+            Comparable dist1 = metric.distance(o1.getKey(), val);
+            Comparable dist2 = metric.distance(o2.getKey(), val);
+            return dist1.compareTo(dist2);
         });
 
         // Find the closest leaf node
@@ -84,8 +83,8 @@ public class KDTree<V> {
         Double dist = Double.MAX_VALUE;
 
         while (node != null) {
-            Comparable dist2 = metric.distance(prev.getKey(), node.getKey());
-            if (dist2.compareTo(0.0) >= 0) {
+            int axis = node.getDepth() % k;
+            if (this.axisComparator.compare(node.getKey(), val, axis) >= 0) {
                 // Lesser
                 prev = node;
                 node = node.getLesser();
@@ -96,10 +95,10 @@ public class KDTree<V> {
             }
         }
         KDTreeNode<V> leaf = prev;
-
+        System.out.println(leaf);
         if (leaf != null) {
             // Used to not re-examine nodes
-            Set<KDTreeNode<V>> examined = new HashSet<KDTreeNode<V>>();
+            Set<KDTreeNode<V>> examined = new HashSet<>();
 
             // Go up the tree, looking for better solutions
             node = leaf;
@@ -112,6 +111,8 @@ public class KDTree<V> {
         }
         // Load up the collection of the results
         Collection<KDTreeNode<V>> collection = new ArrayList<>(k);
+
+
 
         for (KDTreeNode<V> kdNode : results)
             collection.add(kdNode);

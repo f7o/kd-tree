@@ -1,4 +1,4 @@
-package de.f7o.kd_tree.util;
+package de.tu_darmstadt.gris.edge_bundling.util;
 
 /**
  * Created by flo on 29.01.2016.
