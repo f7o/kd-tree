@@ -9,13 +9,15 @@ public class KDTree<V> {
     private KDTreeNode<V> root;
     private Metric<V> metric;
     private AxisComparator<V> axisComparator;
+    private AxisValueResolver<V> axisValueResolver;
     //max. k=4
     private Integer k;
 
 
-    public KDTree(Metric<V> metric, AxisComparator<V> axisComparator, Integer k) {
+    public KDTree(Metric<V> metric, AxisComparator<V> axisComparator, AxisValueResolver<V> axisValueResolver, Integer k) {
         this.metric = metric;
         this.axisComparator = axisComparator;
+        this.axisValueResolver = axisValueResolver;
         this.k = k;
     }
 
@@ -38,7 +40,7 @@ public class KDTree<V> {
                     KDTreeNode<V> newNode = new KDTreeNode<>(val, node.getDepth() +1, k);
                     newNode.setParent(node);
                     node.setLesser(newNode);
-                    System.out.println(newNode);
+                    //System.out.println(newNode);
                     break;
                 }
                 node = node.getLesser();
@@ -48,7 +50,7 @@ public class KDTree<V> {
                     KDTreeNode<V> newNode = new KDTreeNode<>(val, node.getDepth() +1, k);
                     newNode.setParent(node);
                     node.setGreater(newNode);
-                    System.out.println(newNode);
+                    //System.out.println(newNode);
                     break;
                 }
                 node = node.getGreater();
@@ -120,7 +122,66 @@ public class KDTree<V> {
     }
 
     private void searchNode(V val, KDTreeNode<V> node, int k, TreeSet<KDTreeNode<V>> results, Set<KDTreeNode<V>> examined) {
+        examined.add(node);
 
+        // Search node
+        KDTreeNode<V> lastNode = null;
+        Double lastDistance = Double.MAX_VALUE;
+        if (results.size() > 0) {
+            lastNode = results.last();
+            lastDistance = metric.distance(lastNode.getKey(), val);
+        }
+        Double nodeDistance = metric.distance(node.getKey(), val);
+        if (nodeDistance.compareTo(lastDistance) < 0) {
+            if (results.size() == k && lastNode != null)
+                results.remove(lastNode);
+            results.add(node);
+        } else if (nodeDistance.equals(lastDistance)) {
+            results.add(node);
+        } else if (results.size() < k) {
+            results.add(node);
+        }
+        lastNode = results.last();
+        lastDistance = metric.distance(lastNode.getKey(), val);
+
+        int axis = node.getDepth() % this.k;
+        KDTreeNode<V> lesser = node.getLesser();
+        KDTreeNode<V> greater = node.getGreater();
+
+
+        // Search children branches, if axis aligned distance is less than
+        // current distance
+        if (lesser != null && !examined.contains(lesser)) {
+            examined.add(lesser);
+
+            double nodePoint = Double.MIN_VALUE;
+            double valueMinusDistance = Double.MIN_VALUE;
+
+            nodePoint = this.axisValueResolver.getAxisVal(node.getKey(), axis);
+            valueMinusDistance = this.axisValueResolver.getAxisVal(val, axis) - lastDistance;
+
+
+            boolean lineIntersectsCube = ((valueMinusDistance <= nodePoint) ? true : false);
+
+            // Continue down lesser branch
+            if (lineIntersectsCube)
+                searchNode(val, lesser, k, results, examined);
+        }
+        if (greater != null && !examined.contains(greater)) {
+            examined.add(greater);
+
+            double nodePoint = Double.MIN_VALUE;
+            double valuePlusDistance = Double.MIN_VALUE;
+
+            nodePoint = this.axisValueResolver.getAxisVal(node.getKey(), axis);
+            valuePlusDistance = this.axisValueResolver.getAxisVal(val, axis) - lastDistance;
+
+            boolean lineIntersectsCube = ((valuePlusDistance >= nodePoint) ? true : false);
+
+            // Continue down greater branch
+            if (lineIntersectsCube)
+                searchNode(val, greater, k, results, examined);
+        }
     }
 
     @Override
